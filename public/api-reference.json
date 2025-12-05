@@ -1,0 +1,624 @@
+{
+  "openapi": "3.0.0",
+  "info": {
+    "title": "Shlink API",
+    "description": "Shlink is a self-hosted URL shortener that can be used to serve shortened URLs under your own domain. This API allows you to manage short URLs, tags, visits, domains, and integrations.",
+    "version": "3.0.0",
+    "contact": {
+      "name": "Shlink",
+      "url": "https://shlink.io"
+    },
+    "license": {
+      "name": "MIT",
+      "url": "https://github.com/shlinkio/shlink/blob/main/LICENSE"
+    }
+  },
+  "servers": [
+    {
+      "url": "https://{host}",
+      "description": "Production server",
+      "variables": {
+        "host": {
+          "default": "your-shlink-instance.com",
+          "description": "Your Shlink instance hostname"
+        }
+      }
+    }
+  ],
+  "security": [
+    {
+      "ApiKey": []
+    }
+  ],
+  "tags": [
+    {
+      "name": "Short URLs",
+      "description": "Operations for managing short URLs"
+    },
+    {
+      "name": "Visits",
+      "description": "Operations for tracking visits"
+    },
+    {
+      "name": "Tags",
+      "description": "Operations for managing tags"
+    },
+    {
+      "name": "Domains",
+      "description": "Operations for managing domains"
+    },
+    {
+      "name": "Monitoring",
+      "description": "Health check endpoints"
+    }
+  ],
+  "paths": {
+    "/rest/v{version}/short-urls": {
+      "get": {
+        "operationId": "listShortUrls",
+        "tags": ["Short URLs"],
+        "summary": "List short URLs",
+        "parameters": [
+          {
+            "$ref": "#/components/parameters/version"
+          },
+          {
+            "name": "page",
+            "in": "query",
+            "schema": {
+              "type": "integer",
+              "default": 1
+            }
+          },
+          {
+            "name": "itemsPerPage",
+            "in": "query",
+            "schema": {
+              "type": "integer",
+              "default": 10
+            }
+          },
+          {
+            "name": "searchTerm",
+            "in": "query",
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "List of short URLs",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ShortUrlList"
+                }
+              }
+            }
+          }
+        }
+      },
+      "post": {
+        "operationId": "createShortUrl",
+        "tags": ["Short URLs"],
+        "summary": "Create short URL",
+        "parameters": [
+          {
+            "$ref": "#/components/parameters/version"
+          }
+        ],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/ShortUrlCreate"
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "Short URL created",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ShortUrl"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/rest/v{version}/short-urls/{shortCode}": {
+      "get": {
+        "operationId": "getShortUrl",
+        "tags": ["Short URLs"],
+        "summary": "Get short URL details",
+        "parameters": [
+          {
+            "$ref": "#/components/parameters/version"
+          },
+          {
+            "$ref": "#/components/parameters/shortCode"
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Short URL details",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ShortUrl"
+                }
+              }
+            }
+          },
+          "404": {
+            "$ref": "#/components/responses/NotFound"
+          }
+        }
+      },
+      "patch": {
+        "operationId": "editShortUrl",
+        "tags": ["Short URLs"],
+        "summary": "Edit short URL",
+        "parameters": [
+          {
+            "$ref": "#/components/parameters/version"
+          },
+          {
+            "$ref": "#/components/parameters/shortCode"
+          }
+        ],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/ShortUrlEdit"
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "Short URL updated",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ShortUrl"
+                }
+              }
+            }
+          },
+          "404": {
+            "$ref": "#/components/responses/NotFound"
+          }
+        }
+      },
+      "delete": {
+        "operationId": "deleteShortUrl",
+        "tags": ["Short URLs"],
+        "summary": "Delete short URL",
+        "parameters": [
+          {
+            "$ref": "#/components/parameters/version"
+          },
+          {
+            "$ref": "#/components/parameters/shortCode"
+          }
+        ],
+        "responses": {
+          "204": {
+            "description": "Short URL deleted"
+          },
+          "404": {
+            "$ref": "#/components/responses/NotFound"
+          }
+        }
+      }
+    },
+    "/rest/v{version}/short-urls/{shortCode}/visits": {
+      "get": {
+        "operationId": "getShortUrlVisits",
+        "tags": ["Visits"],
+        "summary": "Get visits for a short URL",
+        "parameters": [
+          {
+            "$ref": "#/components/parameters/version"
+          },
+          {
+            "$ref": "#/components/parameters/shortCode"
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "List of visits",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/VisitsList"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/rest/v{version}/tags": {
+      "get": {
+        "operationId": "listTags",
+        "tags": ["Tags"],
+        "summary": "List all tags",
+        "parameters": [
+          {
+            "$ref": "#/components/parameters/version"
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "List of tags",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/TagsList"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/rest/health": {
+      "get": {
+        "operationId": "health",
+        "tags": ["Monitoring"],
+        "summary": "Health check",
+        "security": [],
+        "responses": {
+          "200": {
+            "description": "Service is healthy",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Health"
+                }
+              }
+            }
+          }
+        }
+      }
+    }
+  },
+  "components": {
+    "securitySchemes": {
+      "ApiKey": {
+        "type": "apiKey",
+        "in": "header",
+        "name": "X-Api-Key",
+        "description": "API key for authentication"
+      }
+    },
+    "parameters": {
+      "version": {
+        "name": "version",
+        "in": "path",
+        "required": true,
+        "schema": {
+          "type": "string",
+          "enum": ["1", "2", "3"],
+          "default": "3"
+        }
+      },
+      "shortCode": {
+        "name": "shortCode",
+        "in": "path",
+        "required": true,
+        "schema": {
+          "type": "string"
+        }
+      }
+    },
+    "schemas": {
+      "ShortUrl": {
+        "type": "object",
+        "properties": {
+          "shortCode": {
+            "type": "string"
+          },
+          "shortUrl": {
+            "type": "string",
+            "format": "uri"
+          },
+          "longUrl": {
+            "type": "string",
+            "format": "uri"
+          },
+          "dateCreated": {
+            "type": "string",
+            "format": "date-time"
+          },
+          "tags": {
+            "type": "array",
+            "items": {
+              "type": "string"
+            }
+          },
+          "meta": {
+            "$ref": "#/components/schemas/ShortUrlMeta"
+          },
+          "domain": {
+            "type": "string",
+            "nullable": true
+          },
+          "title": {
+            "type": "string",
+            "nullable": true
+          },
+          "crawlable": {
+            "type": "boolean"
+          },
+          "forwardQuery": {
+            "type": "boolean"
+          },
+          "visitsSummary": {
+            "$ref": "#/components/schemas/VisitsSummary"
+          }
+        }
+      },
+      "ShortUrlCreate": {
+        "type": "object",
+        "required": ["longUrl"],
+        "properties": {
+          "longUrl": {
+            "type": "string",
+            "format": "uri"
+          },
+          "customSlug": {
+            "type": "string"
+          },
+          "tags": {
+            "type": "array",
+            "items": {
+              "type": "string"
+            }
+          },
+          "title": {
+            "type": "string"
+          },
+          "domain": {
+            "type": "string"
+          },
+          "validSince": {
+            "type": "string",
+            "format": "date-time"
+          },
+          "validUntil": {
+            "type": "string",
+            "format": "date-time"
+          },
+          "maxVisits": {
+            "type": "integer"
+          },
+          "findIfExists": {
+            "type": "boolean"
+          },
+          "crawlable": {
+            "type": "boolean"
+          },
+          "forwardQuery": {
+            "type": "boolean"
+          }
+        }
+      },
+      "ShortUrlEdit": {
+        "type": "object",
+        "properties": {
+          "longUrl": {
+            "type": "string",
+            "format": "uri"
+          },
+          "tags": {
+            "type": "array",
+            "items": {
+              "type": "string"
+            }
+          },
+          "title": {
+            "type": "string"
+          },
+          "validSince": {
+            "type": "string",
+            "format": "date-time"
+          },
+          "validUntil": {
+            "type": "string",
+            "format": "date-time"
+          },
+          "maxVisits": {
+            "type": "integer"
+          },
+          "crawlable": {
+            "type": "boolean"
+          },
+          "forwardQuery": {
+            "type": "boolean"
+          }
+        }
+      },
+      "ShortUrlMeta": {
+        "type": "object",
+        "properties": {
+          "validSince": {
+            "type": "string",
+            "format": "date-time",
+            "nullable": true
+          },
+          "validUntil": {
+            "type": "string",
+            "format": "date-time",
+            "nullable": true
+          },
+          "maxVisits": {
+            "type": "integer",
+            "nullable": true
+          }
+        }
+      },
+      "VisitsSummary": {
+        "type": "object",
+        "properties": {
+          "total": {
+            "type": "integer"
+          },
+          "nonBots": {
+            "type": "integer"
+          },
+          "bots": {
+            "type": "integer"
+          }
+        }
+      },
+      "ShortUrlList": {
+        "type": "object",
+        "properties": {
+          "shortUrls": {
+            "type": "object",
+            "properties": {
+              "data": {
+                "type": "array",
+                "items": {
+                  "$ref": "#/components/schemas/ShortUrl"
+                }
+              },
+              "pagination": {
+                "$ref": "#/components/schemas/Pagination"
+              }
+            }
+          }
+        }
+      },
+      "VisitsList": {
+        "type": "object",
+        "properties": {
+          "visits": {
+            "type": "object",
+            "properties": {
+              "data": {
+                "type": "array",
+                "items": {
+                  "$ref": "#/components/schemas/Visit"
+                }
+              },
+              "pagination": {
+                "$ref": "#/components/schemas/Pagination"
+              }
+            }
+          }
+        }
+      },
+      "Visit": {
+        "type": "object",
+        "properties": {
+          "referer": {
+            "type": "string"
+          },
+          "date": {
+            "type": "string",
+            "format": "date-time"
+          },
+          "userAgent": {
+            "type": "string"
+          },
+          "visitLocation": {
+            "type": "object",
+            "nullable": true
+          },
+          "potentialBot": {
+            "type": "boolean"
+          }
+        }
+      },
+      "TagsList": {
+        "type": "object",
+        "properties": {
+          "tags": {
+            "type": "object",
+            "properties": {
+              "data": {
+                "type": "array",
+                "items": {
+                  "type": "string"
+                }
+              }
+            }
+          }
+        }
+      },
+      "Pagination": {
+        "type": "object",
+        "properties": {
+          "currentPage": {
+            "type": "integer"
+          },
+          "pagesCount": {
+            "type": "integer"
+          },
+          "itemsPerPage": {
+            "type": "integer"
+          },
+          "itemsInCurrentPage": {
+            "type": "integer"
+          },
+          "totalItems": {
+            "type": "integer"
+          }
+        }
+      },
+      "Health": {
+        "type": "object",
+        "properties": {
+          "status": {
+            "type": "string",
+            "enum": ["pass", "fail"]
+          },
+          "version": {
+            "type": "string"
+          }
+        }
+      },
+      "Error": {
+        "type": "object",
+        "properties": {
+          "type": {
+            "type": "string"
+          },
+          "title": {
+            "type": "string"
+          },
+          "detail": {
+            "type": "string"
+          },
+          "status": {
+            "type": "integer"
+          }
+        }
+      }
+    },
+    "responses": {
+      "NotFound": {
+        "description": "Resource not found",
+        "content": {
+          "application/problem+json": {
+            "schema": {
+              "$ref": "#/components/schemas/Error"
+            }
+          }
+        }
+      }
+    }
+  }
+}
